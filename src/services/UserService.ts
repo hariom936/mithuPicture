@@ -47,28 +47,28 @@ export class UserService {
     try {
       // Check if the email already exists in the database
       const existingUser = await this.user.findOne({ where: { email: userData.email } });
-  
+
       if (existingUser) {
         // If the email exists, throw an error indicating the email is already taken
         throw new ApiError(httpStatus.BAD_REQUEST, "User email is already existed");
       }
-  
+
       // Map userData to the user entity
       const userToCreate = this.mapToUserEntity(userData);
-  
+
       // Create and save the new user
       const createdUser = await this.user.create(userToCreate);
       await this.user.save(createdUser);
-  
+
       return { createdUser };
     } catch (error: any) {
       console.error("Error creating user:", error);
       // If any error occurs, throw a generic internal server error
-      
+
     }
   }
-  
-  
+
+
   private mapToUserEntity(userData: UserData): Users {
     return {
       first_name: userData.first_name,
@@ -79,7 +79,7 @@ export class UserService {
       role: userData.role
     } as unknown as Users;
   }
-  
+
 
   /**
    * Login a user with email and password
@@ -88,33 +88,30 @@ export class UserService {
    */
   public async login(loginUserData: LoginUserData) {
     try {
-        // Check if the user exists by email and password in the Users table
-        const existingUser = await this.user.findOne({
-            where: { email: loginUserData.email.toLowerCase(), password: loginUserData.password },
-            select: ["id", "first_name", "last_name", "email", "phone", "password","role", "createdAt", "updatedAt"], // Select all user data
-        });
+      // Check if the user exists by email and password in the Users table
+      const existingUser = await this.user.findOne({
+        where: { email: loginUserData.email.toLowerCase(), password: loginUserData.password },
+        select: ["id", "first_name", "last_name", "email", "phone", "password", "role", "createdAt", "updatedAt"], // Select all user data
+      });
 
-        if (!existingUser) {
-            // If no user is found, throw an error indicating the email doesn't exist
-            throw new ApiError(httpStatus.BAD_REQUEST, "Email or password is incorrect");
-        }
-        // If the email exists and matches the password, save the login attempt in the LoginUser tabl
+      if (!existingUser) {
+        // If no user is found, throw an error indicating the email doesn't exist
+        throw new ApiError(httpStatus.BAD_REQUEST, "Email or password is incorrect");
+      }
+      // If the email exists and matches the password, save the login attempt in the LoginUser tabl
 
-        // Save the login attempt to the LoginUser table
-        await this.logins.save(existingUser);
+      // Save the login attempt to the LoginUser table
+      await this.logins.save(existingUser);
 
-        // If the email exists and matches the password, return the full user data (indicating successful login)
-        return existingUser;
+      // If the email exists and matches the password, return the full user data (indicating successful login)
+      return existingUser;
 
     } catch (error: any) {
-        console.error("Login error:", error);
-        // Handle any internal errors by throwing a generic internal server error
-       
+      console.error("Login error:", error);
+      // Handle any internal errors by throwing a generic internal server error
+
     }
-}
-
-
-
+  }
 
 
   public async fetchData(query): Promise<{ count: number; users: Users[] }> {
@@ -130,30 +127,37 @@ export class UserService {
   }
 
   public async fetchDetails(queryParam: any) {
-    const { userId, modelType, limit, offset, sort, search } = queryParam;
-    const queryCondition: any = {};
+    try {
+        const { userId, search } = queryParam;
 
-    // Prepare query conditions based on the provided parameters
-    if (!modelType) {
-      const user = await this.user.findOne({ where: { id: userId } });
-      return user;
-    }
-    if (limit) {
-      queryCondition.take = limit;
-      queryCondition.skip = offset;
-    }
-    if (sort) {
-      queryCondition.order = sort;
-    }
-    if (search) {
-      queryCondition.where = { first_name: search };
-    }
+        // If searching by `userId`
+        if (userId) {
+            const user = await this.user.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new Error("User not found");
+            }
+            return { data: [user] };
+        }
 
-    let data = [];
+        // If searching by `first_name`
+        if (search) {
+            const users = await this.user.find({ where: { first_name: search } });
+            if (users.length === 0) {
+                throw new Error("No users found with the given name");
+            }
+            return { data: users };
+        }
 
-    return { data }; 
-  }
+        // If neither `userId` nor `search` is provided
+        throw new Error("Either userId or search parameter is required ");
+    } catch (error) {
+        // Return a clean error message
+        return { message: error.message };
+    }
+}
 
+
+  
   public async updateUser(
     userId: number,
     updateUser: any
@@ -181,11 +185,11 @@ export class UserService {
   public async deleteUser(userId: number): Promise<void> {
     // Find the user to delete
     const userToDelete = await this.user.findOne({ where: { id: userId } });
-    
+
     if (!userToDelete) {
       throw new Error(`User with id ${userId} not found`);
     }
-  
+
     try {
       // Delete the user from the database
       await this.user.remove(userToDelete);
@@ -194,7 +198,7 @@ export class UserService {
       throw new Error(`Unable to delete user with id ${userId}. Error: ${error.message}`);
     }
   }
-  
-  
-  
+
+
+
 }

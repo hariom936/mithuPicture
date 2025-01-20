@@ -15,6 +15,7 @@ import {
   CreateUser,
   LoginUser,
   UpdateUser,
+  UserDetailsListing,
   UserListing,
 } from "../../validations/UserValidation";
 import messages from "../../constant/messages";
@@ -128,7 +129,7 @@ export default class CustomerAdminAuthController {
   @Get(action.DETAIL)
   public async getMallDetails(
     @Req() req: Request,
-    @QueryParams() query: UserListing,
+    @QueryParams() query: UserDetailsListing,
     @Res() res: Response
   ) {
     try {
