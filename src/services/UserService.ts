@@ -117,14 +117,31 @@ export class UserService {
   public async fetchData(query): Promise<{ count: number; users: Users[] }> {
     let queryCondition;
     let search = query.search || null;
-    if (search && search !== "" && search !== undefined && search !== null)
-      queryCondition = { where: { storeName: Like(`%${search}%`) } };
-    else queryCondition = {};
+
+    // Check if there's a search term and construct the query condition accordingly
+    if (search && search !== "" && search !== undefined && search !== null) {
+        queryCondition = { where: { storeName: Like(`%${search}%`) } };
+    } else {
+        queryCondition = {};
+    }
+
+    // Add ordering by 'id' in ascending order
+    queryCondition = {
+        ...queryCondition,
+        order: {
+            id: 'ASC'  // Order by 'id' in ascending order
+        }
+    };
+
+    // Count the total number of users
     const count = await this.user.count(queryCondition);
+
+    // Fetch the users based on the query condition
     const users = await this.user.find(queryCondition);
 
     return { count, users };
-  }
+}
+
 
   public async fetchDetails(queryParam: any) {
     try {
@@ -158,29 +175,27 @@ export class UserService {
 
 
   
-  public async updateUser(
-    userId: number,
-    updateUser: any
-  ): Promise<Users | undefined> {
-    const userToUpdate = await this.user.findOne({ where: { id: userId } });
-    if (!userToUpdate) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    // Update the user entity with the new data
-    Object.assign(userToUpdate, updateUser);
-
-    // Save the updated user entity back to the database
-    try {
-      await this.user.save(userToUpdate);
-      return userToUpdate;
-    } catch (error) {
-      // Handle errors such as validation errors, database errors, etc.
-      throw new Error(
-        `Unable to update user with id ${userId}. Error: ${error.message}`
-      );
-    }
+public async updateUser(userId: number, updateUser: { password: number }): Promise<Users | undefined> {
+  const userToUpdate = await this.user.findOne({ where: { id: userId } });
+  if (!userToUpdate) {
+    throw new Error(`User with id ${userId} not found`);
   }
+
+  // If password is passed, update it
+  if (updateUser.password) {
+    userToUpdate.password = updateUser.password;
+  }
+
+  // Save the updated user entity back to the database
+  try {
+    await this.user.save(userToUpdate);
+    return userToUpdate;
+  } catch (error) {
+    throw new Error(
+      `Unable to update user with id ${userId}. Error: ${error.message}`
+    );
+  }
+}
 
   public async deleteUser(userId: number): Promise<void> {
     // Find the user to delete

@@ -66,7 +66,7 @@ export class UserListing {
   limit: number;
 }
 
-export class UserDetailsListing {
+export class UserId {
   
   @IsOptional({ message: "UserId is Required" })
   @IsNumber()
@@ -76,27 +76,12 @@ export class UserDetailsListing {
 }
 
 export class UpdateUser {
-  @IsOptional({ message: validationConstants.REQUIRED })
-  first_name: string;
+  
 
-  @IsOptional({ message: validationConstants.REQUIRED })
-  last_name: string;
-
-  @IsOptional({ message: validationConstants.INVALID_VALUE })
-  @IsEmail({}, { message: validationConstants.INVALID_VALUE })
-  email: string;
-
-  @IsNotEmpty({ message: validationConstants.REQUIRED })
-  @IsNumber({}, { message: validationConstants.IS_NUMBER_TYPE })
-  phone: number;
-
-  @IsNotEmpty({ message: validationConstants.REQUIRED })
-  @IsNumber({},{ message: validationConstants.IS_NUMBER_TYPE })
-  password: number;
-
-  @IsNotEmpty({ message: validationConstants.REQUIRED })
-  @IsDateString({},{ message: validationConstants.INVALID_DATE_FORMAT })
-  birthday: Date;
+  @IsOptional({ message: "UserId is Required" })
+  @IsNumber()
+  @Min(1)
+  userId: number;
 
   
 

@@ -8,6 +8,7 @@ import {
   QueryParams,
   Patch,
   Delete,
+  QueryParam,
 } from "routing-controllers";
 import { Service } from "typedi";
 import { ResponseService } from "../../services/ResponseService";
@@ -15,7 +16,7 @@ import {
   CreateUser,
   LoginUser,
   UpdateUser,
-  UserDetailsListing,
+  UserId,
   UserListing,
 } from "../../validations/UserValidation";
 import messages from "../../constant/messages";
@@ -129,7 +130,7 @@ export default class CustomerAdminAuthController {
   @Get(action.DETAIL)
   public async getMallDetails(
     @Req() req: Request,
-    @QueryParams() query: UserDetailsListing,
+    @QueryParams() query: UserId,
     @Res() res: Response
   ) {
     try {
@@ -156,39 +157,49 @@ export default class CustomerAdminAuthController {
 
   @Patch(action.UPDATE)
   public async editUserData(
-    @Body() updateUser: UpdateUser,
-    @Res() res: Response,
-    @Req() req: Request
-  ) {
-    try {
-      const userId = Users.id;
-      const upData = await this.userService.updateUser(userId, updateUser);
-      if (!upData) {
-        return this.responseService.failure({
-          res,
-          message: messages.USER.USER_UPDATE_FAILED,
-        });
-      }
-      return this.responseService.success({
+  @QueryParams() userDetails: UserId, // Get userDetails from query parameter
+  @Body() updateUser: { password: number }, // Get password from the body
+  @Res() res: Response,
+  @Req() req: Request
+) {
+  try {
+    const userId = userDetails.userId; // Extract userId from userDetails
+
+    // Pass both userId and password to the updateUser method
+    const upData = await this.userService.updateUser(userId, updateUser);
+
+    if (!upData) {
+      return this.responseService.failure({
         res,
-        message: messages.USER.USER_UPDATE_SUCCESS,
-        data: upData,
-      });
-    } catch (error) {
-      return this.responseService.serverError({
-        res,
-        error: error.message || 'Server Error',
+        message: messages.USER.USER_UPDATE_FAILED,
       });
     }
+
+    return this.responseService.success({
+      res,
+      message: messages.USER.USER_UPDATE_SUCCESS,
+      data: upData,
+    });
+  } catch (error) {
+    return this.responseService.serverError({
+      res,
+      error: error.message || 'Server Error',
+    });
   }
+}
+
+
+
+
 
   @Delete(action.DELETE)
   public async deleteUser(
+    @QueryParams() userDetails: UserId, // Get userDetails from query parameter
     @Res() res: Response,
     @Req() req: Request
   ) {
     try {
-      const userId = Users.id; 
+      const userId = userDetails.userId; // Extract userId from userDetails
       await this.userService.deleteUser(userId); 
       
       return this.responseService.success({
