@@ -10,6 +10,7 @@ const action = {
 
 const component = {
   USER: 'user',
+  SERVICE: 'service',
 };
 
 

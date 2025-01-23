@@ -27,5 +27,11 @@ export default {
     FETCH_ERROR:"Error is fetching user details ",
     DELETE_USER_FAILED: 'User delete has failed!',
     DELETE_USER_SUCCESS: 'User deleted successfully!',
+  },
+
+  SERVICE: {
+    SERVICE_ADD_SUCCESS: 'Service created successfully!',
+    SERVICR_FAILED: 'Service Type is Duplicate!',
+   
   }
 }
