@@ -33,10 +33,6 @@ export class CreateUser {
   @IsNumber({},{ message: validationConstants.IS_NUMBER_TYPE })
   password: number;
 
-  @IsNotEmpty({ message: validationConstants.REQUIRED })
-  @IsEnum(UserRole, { message: validationConstants.INVALID_VALUE })
-  role: UserRole;  // Use the enum to validate the role field
-
 
 }
 

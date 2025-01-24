@@ -20,7 +20,7 @@ interface UserData {
   email: string;
   phone: number;
   password: number;
-  role: string;
+ 
 }
 
 interface LoginUserData {
@@ -76,7 +76,6 @@ export class UserService {
       email: userData.email,
       phone: userData.phone,
       password: userData.password,
-      role: userData.role
     } as unknown as Users;
   }
 
