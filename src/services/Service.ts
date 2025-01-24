@@ -1,6 +1,6 @@
 import { Service } from "typedi";
 import { ApiError } from "../utils/Apierror";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import AppDataSource from "../config/dbconfig";
 import { Services  } from "../entity/Service"; // Adjust based on your actual entity path
 import httpStatus from "http-status";
@@ -32,7 +32,7 @@ export class Servicess {
     try {
       // Check if the service already exists by its type and description
       const existingService = await this.service.findOne({
-        where: { type: serviceData.type, description: serviceData.description },
+        where: { description: serviceData.description },
       });
 
       if (existingService) {
@@ -52,6 +52,36 @@ export class Servicess {
      (httpStatus.INTERNAL_SERVER_ERROR, "Error creating service");
     }
   }
+
+
+  //fetch Service Data
+    public async fetchData(query): Promise<{ count: number; servicess: Services[] }> {
+        let queryCondition;
+        let search = query.search || null;
+    
+        // Check if there's a search term and construct the query condition accordingly
+        if (search && search !== "" && search !== undefined && search !== null) {
+            queryCondition = { where: { type: Like(`%${search}%`) } };
+        } else {
+            queryCondition = {};
+        }
+    
+        // Add ordering by 'id' in ascending order
+        queryCondition = {
+            ...queryCondition,
+            order: {
+                id: 'ASC'  // Order by 'id' in ascending order
+            }
+        };
+    
+        // Count the total number of service
+        const count = await this.service.count(queryCondition);
+    
+        // Fetch the users based on the query condition
+        const service = await this.service.find(queryCondition);
+    
+        return { count, servicess: service };
+    }
 }
 export { Service };
 

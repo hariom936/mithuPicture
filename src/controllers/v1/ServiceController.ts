@@ -13,7 +13,8 @@ import {
   import { Service } from "typedi";
   import { ResponseService } from "../../services/ResponseService";
   import {
-    CreateService
+    CreateService,
+    ServiceListing
   } from "../../validations/ServiceValidation";
   import messages from "../../constant/messages";
   import { action, component } from "../../constant/api";
@@ -33,7 +34,6 @@ import {
       this.responseService = new ResponseService();
     }
   
-    @Post(action.ADD)
     @Post(action.ADD)
     public async createService(
       @Req() req: Request,
@@ -66,5 +66,34 @@ import {
       }
     }
     
+
+    //fetch Service Data
+    @Get(action.LIST)
+      public async getListing(
+        @Req() req: Request,
+        @QueryParams() query: ServiceListing,
+        @Res() res: Response
+      ) {
+        try {
+          const fetchData = await this.servicess.fetchData(query);
+          if (fetchData) {
+            return this.responseService.success({
+              res,
+              message: messages.SERVICE.SERVICE_LIST_SUCCESS,
+              data: fetchData,
+            });
+          } else {
+            return this.responseService.noDataFound({
+              res,
+              message: messages.NOT_FOUND,
+            });
+          }
+        } catch (error) {
+          return this.responseService.serverError({
+            res,
+            error,
+          });
+        }
+      }
 
 }

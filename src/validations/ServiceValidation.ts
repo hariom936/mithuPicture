@@ -5,6 +5,7 @@ import {
     IsOptional,
     MaxLength,
     IsIn,
+    Min,
   } from "class-validator";
   
   import validationConstants from "../constant/validationConstants";
@@ -33,5 +34,18 @@ import {
     @IsNotEmpty({ message: validationConstants.REQUIRED })
     @IsString({ message: validationConstants.INVALID_VALUE })
     advancedPriceRange: string;
+  }
+
+  export class ServiceListing {
+    
+    @IsNotEmpty({ message: "Page is Required" })
+    @IsNumber()
+    @Min(1)
+    page: number;
+  
+    @IsNotEmpty({ message: "limit is Required" })
+    @IsNumber()
+    @Min(10)
+    limit: number;
   }
   

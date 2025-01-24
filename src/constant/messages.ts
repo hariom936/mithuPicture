@@ -32,6 +32,8 @@ export default {
   SERVICE: {
     SERVICE_ADD_SUCCESS: 'Service created successfully!',
     SERVICR_FAILED: 'Service Type is Duplicate!',
+    SERVICE_LIST_SUCCESS: 'Service listed successfully!',
+    SERVICE_LIST_FAILED: 'Service listing failed!',
    
   }
 }
