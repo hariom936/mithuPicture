@@ -1,36 +1,17 @@
-// utils/jwt.ts
 import jwt from 'jsonwebtoken';
 
-// import { isTokenBlacklisted } from './redius';
-const SECRET_KEY = 'b113d52a-ea2c-4236-a46d-f195459728bc'; //code will not work on env 
-const JWT_ACCESS_EXPIRATION = '1d';
+// Secret key for signing the JWT (should be stored in environment variables for security)
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
+// Function to generate a JWT token
+export function generateJwtToken(userId: number, email: string, password: number, role: string) {
+  const payload = {
+    userId,
+    email,
+    password,
+    role,
+  };
 
-export function generateToken(payload: object, expiresIn: string = JWT_ACCESS_EXPIRATION): string {
-    return jwt.sign(payload, SECRET_KEY, { expiresIn });
-}
-
-export function verifyToken(token: string): any {
-    try {
-        // if (isTokenBlacklisted(token)) {
-        //     throw new Error('Token blacklisted');
-        // }
-        return jwt.verify(token, SECRET_KEY);
-    } catch (error) {
-        throw new Error('Invalid token');
-    }
-
-
-}
-export function expireToken(token: string): any {
-    try {
-        const authHeader = (token?.split("Bearer ")[1] ||
-            token?.split("bearer ")[1] ||
-            token?.split("b ")[1]) as string;
-        const decoded = jwt.verify(authHeader, SECRET_KEY);
-        console.log(decoded)
-        // const id = decoded.id?
-    } catch (error) {
-        throw new Error('Invalid token');
-    }
+  // Generate JWT token with a 1-hour expiration
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 }

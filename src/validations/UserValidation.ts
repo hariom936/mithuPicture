@@ -32,6 +32,10 @@ export class CreateUser {
   @IsNotEmpty({ message: validationConstants.REQUIRED })
   @IsNumber({},{ message: validationConstants.IS_NUMBER_TYPE })
   password: number;
+  
+  @IsOptional({ message: validationConstants.REQUIRED }) 
+  @IsEnum(UserRole, { message: validationConstants.INVALID_VALUE })
+  role: UserRole;
 
 
 }

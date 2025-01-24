@@ -73,31 +73,39 @@ export default class CustomerAdminAuthController {
 
   @Post(action.LOGIN)
   public async loginUser(
-    @Req() req: Request,
-    @Body() userData: LoginUser,
-    @Res() res: Response
-  ) {
-    try {
-      const user = await this.userService.login(userData);
-      if (user) {
-        return this.responseService.success({
-          res,
-          message: messages.USER.LOGIN_USER_SUCCESS,
-          data: user,
-        });
-      } else {
-        return this.responseService.failure({
-          res,
-          message: messages.USER.LOGIN_USER_FAILED,
-        });
-      }
-    } catch (error) {
-      return this.responseService.serverError({
+  @Req() req: Request,
+  @Body() userData: LoginUser,
+  @Res() res: Response
+) {
+  try {
+    const user = await this.userService.login(userData);
+
+    if (user) {
+      // Return success with user data and JWT token
+      return this.responseService.success({
         res,
-        error,
+        message: messages.USER.LOGIN_USER_SUCCESS,
+        data: {
+          user: user.user,  // The user data
+          token: user.token, // The JWT token
+        },
+      });
+    } else {
+      // If user login failed
+      return this.responseService.failure({
+        res,
+        message: messages.USER.LOGIN_USER_FAILED,
       });
     }
+  } catch (error) {
+    // If an error occurs, return an internal server error
+    return this.responseService.serverError({
+      res,
+      error: error.message,  // Only send the error message, not the stack trace
+    });
   }
+}
+
 
   @Get(action.LIST)
   public async getListing(

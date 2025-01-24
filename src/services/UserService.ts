@@ -13,6 +13,8 @@ import { Like, Repository } from "typeorm";
 import AppDataSource from "../config/dbconfig";
 import { Users } from "../entity/Users";
 import { LoginUser } from "../entity/LoginUser";
+import { generateJwtToken } from "../utils/jwt";
+
 
 interface UserData {
   first_name: string;
@@ -20,7 +22,7 @@ interface UserData {
   email: string;
   phone: number;
   password: number;
- 
+  role: string;
 }
 
 interface LoginUserData {
@@ -76,6 +78,7 @@ export class UserService {
       email: userData.email,
       phone: userData.phone,
       password: userData.password,
+      role: userData.role, 
     } as unknown as Users;
   }
 
@@ -92,23 +95,28 @@ export class UserService {
         where: { email: loginUserData.email.toLowerCase(), password: loginUserData.password },
         select: ["id", "first_name", "last_name", "email", "phone", "password", "role", "createdAt", "updatedAt"], // Select all user data
       });
-
+  
       if (!existingUser) {
-        // If no user is found, throw an error indicating the email doesn't exist
+        // If no user is found, throw an error indicating the email or password is incorrect
         throw new ApiError(httpStatus.BAD_REQUEST, "Email or password is incorrect");
       }
-      // If the email exists and matches the password, save the login attempt in the LoginUser tabl
-
-      // Save the login attempt to the LoginUser table
+  
+      // Generate the JWT token
+      const token = generateJwtToken(existingUser.id, existingUser.email, existingUser.password, existingUser.role);
+  
+      // Save the login attempt to the LoginUser table (optional)
       await this.logins.save(existingUser);
-
-      // If the email exists and matches the password, return the full user data (indicating successful login)
-      return existingUser;
-
+  
+      // Return the user data and the token on successful login
+      return {
+        user: existingUser,
+        token: token,  // The JWT token
+      };
+  
     } catch (error: any) {
       console.error("Login error:", error);
       // Handle any internal errors by throwing a generic internal server error
-
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "An error occurred during login");
     }
   }
 
