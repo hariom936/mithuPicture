@@ -90,35 +90,44 @@ export class UserService {
    */
   public async login(loginUserData: LoginUserData) {
     try {
-      // Check if the user exists by email and password in the Users table
+      // Check if the user exists by email and password
       const existingUser = await this.user.findOne({
         where: { email: loginUserData.email.toLowerCase(), password: loginUserData.password },
-        select: ["id", "first_name", "last_name", "email", "phone", "password", "role", "createdAt", "updatedAt"], // Select all user data
+        select: ["id", "first_name", "last_name", "email", "phone", "password", "role", "createdAt", "updatedAt", "token"],
       });
   
       if (!existingUser) {
-        // If no user is found, throw an error indicating the email or password is incorrect
         throw new ApiError(httpStatus.BAD_REQUEST, "Email or password is incorrect");
       }
   
       // Generate the JWT token
       const token = generateJwtToken(existingUser.id, existingUser.email, existingUser.password, existingUser.role);
   
-      // Save the login attempt to the LoginUser table (optional)
-      await this.logins.save(existingUser);
+      // Save the token in the user's record
+      existingUser.token = token;
+      await this.user.save(existingUser);
   
-      // Return the user data and the token on successful login
+      // Optionally save the login attempt in LoginUser (for logging purposes)
+      const loginAttempt = new LoginUser();
+      loginAttempt.email = existingUser.email;
+      loginAttempt.password = existingUser.password;
+      loginAttempt.role = existingUser.role;
+      await this.logins.save(loginAttempt);
+  
+      // Return the user with the token as part of the user object
       return {
-        user: existingUser,
-        token: token,  // The JWT token
+        user: {
+          ...existingUser,
+          token: token,  // Include token inside the user object
+        },
       };
   
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login error:", error);
-      // Handle any internal errors by throwing a generic internal server error
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "An error occurred during login");
     }
   }
+  
 
 
   public async fetchData(query): Promise<{ count: number; users: Users[] }> {

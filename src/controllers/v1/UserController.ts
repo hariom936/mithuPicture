@@ -87,7 +87,7 @@ export default class CustomerAdminAuthController {
         message: messages.USER.LOGIN_USER_SUCCESS,
         data: {
           user: user.user,  // The user data
-          token: user.token, // The JWT token
+          // The JWT token
         },
       });
     } else {

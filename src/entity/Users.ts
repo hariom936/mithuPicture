@@ -36,10 +36,13 @@ export class Users {
     })
     role: UserRole; // Column is of type UserRole
 
+    @Column({ nullable: true })
+    token: string;  // New column for storing the token
+
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
 
     @UpdateDateColumn({ type: 'timestamp' })
     updatedAt: Date;
-  static id: any;
+ 
 }
