@@ -42,7 +42,7 @@ export class CreateUser {
 
 export class LoginUser {
 
-  @IsOptional({ message: validationConstants.INVALID_VALUE })
+  @IsNotEmpty({ message: validationConstants.REQUIRED })
   @IsEmail({}, { message: validationConstants.INVALID_VALUE })
   email: string;
 
@@ -78,10 +78,28 @@ export class UserId {
 export class UpdateUser {
   
 
-  @IsOptional({ message: "UserId is Required" })
-  @IsNumber()
-  @Min(1)
-  userId: number;
+  @IsOptional({ message: validationConstants.REQUIRED })
+  first_name: string;
+
+  @IsOptional({ message: validationConstants.REQUIRED })
+  last_name: string;
+
+  @IsOptional({ message: validationConstants.INVALID_VALUE })
+  @IsEmail({}, { message: validationConstants.INVALID_VALUE })
+  email: string;
+
+  @IsNotEmpty({ message: validationConstants.REQUIRED })
+  @IsNumber({}, { message: validationConstants.IS_NUMBER_TYPE })
+  phone: number;
+
+  @IsNotEmpty({ message: validationConstants.REQUIRED })
+  @IsNumber({},{ message: validationConstants.IS_NUMBER_TYPE })
+  password: number;
+  
+  @IsOptional({ message: validationConstants.REQUIRED }) 
+  @IsEnum(UserRole, { message: validationConstants.INVALID_VALUE })
+  role: UserRole;
+
 
   
 

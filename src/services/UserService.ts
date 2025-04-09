@@ -191,27 +191,29 @@ export class UserService {
 
 
   
-public async updateUser(userId: number, updateUser: { password: number }): Promise<Users | undefined> {
+public async updateUser(userId: number, updateUser: Partial<Users>): Promise<Users | undefined> {
   const userToUpdate = await this.user.findOne({ where: { id: userId } });
   if (!userToUpdate) {
     throw new Error(`User with id ${userId} not found`);
   }
 
-  // If password is passed, update it
-  if (updateUser.password) {
-    userToUpdate.password = updateUser.password;
-  }
+  // Update only provided fields
+  if (updateUser.first_name !== undefined) userToUpdate.first_name = updateUser.first_name;
+  if (updateUser.last_name !== undefined) userToUpdate.last_name = updateUser.last_name;
+  if (updateUser.email !== undefined) userToUpdate.email = updateUser.email;
+  if (updateUser.phone !== undefined) userToUpdate.phone = updateUser.phone;
+  if (updateUser.password !== undefined) userToUpdate.password = updateUser.password;
+  if (updateUser.role !== undefined) userToUpdate.role = updateUser.role;
 
-  // Save the updated user entity back to the database
+  // Save the updated user
   try {
     await this.user.save(userToUpdate);
     return userToUpdate;
   } catch (error) {
-    throw new Error(
-      `Unable to update user with id ${userId}. Error: ${error.message}`
-    );
+    throw new Error(`Unable to update user with id ${userId}. Error: ${error.message}`);
   }
 }
+
 
   public async deleteUser(userId: number): Promise<void> {
     // Find the user to delete
